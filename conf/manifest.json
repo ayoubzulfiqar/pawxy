@@ -1,5 +1,5 @@
 {
-  "version": 105,
+  "version": 106,
   "updated_at": "2026-10-12T00:00:00Z",
   "servers": [
     {
@@ -37,6 +37,24 @@
       "file_name": "can2.conf",
       "is_pro": true,
       "endpoint": "142.4.216.196:443"
+    },
+    {
+      "id": "nl-01",
+      "country": "Netherlands",
+      "city": "Amsterdam",
+      "flag_code": "NL",
+      "file_name": "neh.conf",
+      "is_pro": false,
+      "endpoint": "netherlands.vpnserverhub.com:27621"
+    },
+    {
+      "id": "pl-01",
+      "country": "Poland",
+      "city": "Warsaw",
+      "flag_code": "PL",
+      "file_name": "po.conf",
+      "is_pro": false,
+      "endpoint": "poland.vpnserverhub.com:47090"
     }
   ]
 }

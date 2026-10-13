@@ -61,6 +61,99 @@ class ServerModel extends Equatable {
     );
   }
 
+  /// Automatically parses a WireGuard .conf file content and builds a ServerModel
+  factory ServerModel.fromWgConfigContent({
+    required String fileName,
+    required String confContent,
+    Map<String, dynamic>? manifestOverride,
+  }) {
+    String parsedEndpoint = '127.0.0.1:443';
+
+    // Parse Endpoint from .conf file
+    final lines = confContent.split('\n');
+    for (var line in lines) {
+      final trimmed = line.trim();
+      if (trimmed.toLowerCase().startsWith('endpoint')) {
+        final parts = trimmed.split('=');
+        if (parts.length > 1) {
+          parsedEndpoint = parts[1].trim();
+        }
+      }
+    }
+
+    final String cleanName = fileName.replaceAll('.conf', '').toLowerCase();
+
+    String country = 'VPN Location';
+    String flagCode = 'UN';
+    String city = cleanName.toUpperCase();
+
+    if (cleanName.startsWith('uk') || cleanName.startsWith('gb')) {
+      country = 'United Kingdom';
+      flagCode = 'GB';
+      city = 'London ${cleanName.replaceAll(RegExp(r'[^0-9]'), '')}'.trim();
+    } else if (cleanName.startsWith('us')) {
+      country = 'United States';
+      flagCode = 'US';
+      city = 'US Server ${cleanName.replaceAll(RegExp(r'[^0-9]'), '')}'.trim();
+    } else if (cleanName.startsWith('can') || cleanName.startsWith('ca')) {
+      country = 'Canada';
+      flagCode = 'CA';
+      city = 'CA Server ${cleanName.replaceAll(RegExp(r'[^0-9]'), '')}'.trim();
+    } else if (cleanName.startsWith('ger') || cleanName.startsWith('de')) {
+      country = 'Germany';
+      flagCode = 'DE';
+      city = 'Frankfurt ${cleanName.replaceAll(RegExp(r'[^0-9]'), '')}'.trim();
+    } else if (cleanName.startsWith('fran') || cleanName.startsWith('fr')) {
+      country = 'France';
+      flagCode = 'FR';
+      city = 'Paris ${cleanName.replaceAll(RegExp(r'[^0-9]'), '')}'.trim();
+    } else if (cleanName.startsWith('neh') || cleanName.startsWith('nl') || cleanName.startsWith('neth')) {
+      country = 'Netherlands';
+      flagCode = 'NL';
+      city = 'Amsterdam ${cleanName.replaceAll(RegExp(r'[^0-9]'), '')}'.trim();
+    } else if (cleanName.startsWith('po') || cleanName.startsWith('pl') || cleanName.startsWith('pol')) {
+      country = 'Poland';
+      flagCode = 'PL';
+      city = 'Warsaw ${cleanName.replaceAll(RegExp(r'[^0-9]'), '')}'.trim();
+    } else if (cleanName.startsWith('jp')) {
+      country = 'Japan';
+      flagCode = 'JP';
+      city = 'Tokyo ${cleanName.replaceAll(RegExp(r'[^0-9]'), '')}'.trim();
+    } else if (cleanName.startsWith('au')) {
+      country = 'Australia';
+      flagCode = 'AU';
+      city = 'Sydney ${cleanName.replaceAll(RegExp(r'[^0-9]'), '')}'.trim();
+    }
+
+    if (city.isEmpty || city.trim().isEmpty) {
+      city = cleanName.toUpperCase();
+    }
+
+    if (manifestOverride != null) {
+      return ServerModel(
+        id: manifestOverride['id'] as String? ?? cleanName,
+        country: manifestOverride['country'] as String? ?? country,
+        city: manifestOverride['city'] as String? ?? city,
+        flagCode: manifestOverride['flag_code'] as String? ?? flagCode,
+        fileName: fileName,
+        isPro: manifestOverride['is_pro'] as bool? ?? false,
+        endpoint: manifestOverride['endpoint'] as String? ?? parsedEndpoint,
+        confContent: confContent,
+      );
+    }
+
+    return ServerModel(
+      id: cleanName,
+      country: country,
+      city: city,
+      flagCode: flagCode,
+      fileName: fileName,
+      isPro: cleanName.contains('2') || cleanName.contains('pro'),
+      endpoint: parsedEndpoint,
+      confContent: confContent,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

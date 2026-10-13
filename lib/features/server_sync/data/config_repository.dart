@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_constants.dart';
@@ -17,23 +18,24 @@ class ConfigRepository {
   /// Returns persistent directory for vpn_configs
   Future<Directory> _getConfigsDirectory() async {
     final docsDir = await getApplicationDocumentsDirectory();
-    final configDir = Directory('${docsDir.path}/vpn_configs');
+    final configDir = Directory(p.join(docsDir.path, 'vpn_configs'));
     if (!await configDir.exists()) {
       await configDir.create(recursive: true);
     }
     return configDir;
   }
 
-  /// Synchronizes and returns the server list using offline cache, remote sync, or fallback assets.
+  /// Synchronizes and returns the server list by scanning local .conf files and remote repo.
   Future<List<ServerModel>> loadAndSyncServers() async {
-    List<ServerModel> cachedServers = [];
+    Map<String, ServerModel> serversMap = {};
 
-    // Step 1: Attempt to load from persistent local disk storage or SharedPreferences
+    // Step 1: Scan local configs directory for any existing .conf files
     try {
-      cachedServers = await _loadFromLocalDisk();
-    } catch (_) {
-      // Local load error
-    }
+      final localScanned = await _scanLocalConfigsDirectory();
+      for (final server in localScanned) {
+        serversMap[server.fileName] = server;
+      }
+    } catch (_) {}
 
     // Step 2: Concurrently fetch remote manifest from GitHub raw URL
     try {
@@ -46,28 +48,25 @@ class ConfigRepository {
       final int localVersion =
           prefs.getInt(AppConstants.prefManifestVersion) ?? -1;
 
-      // Delta Evaluation: If remote version > local version or cached servers empty
-      if (remoteVersion > localVersion || cachedServers.isEmpty) {
-        final List<dynamic> serverListJson =
-            remoteJson['servers'] as List<dynamic>? ?? [];
-        final Directory configDir = await _getConfigsDirectory();
+      final List<dynamic> serverListJson =
+          remoteJson['servers'] as List<dynamic>? ?? [];
+      final Directory configDir = await _getConfigsDirectory();
 
-        final List<ServerModel> updatedServers = [];
-
+      // Download/update remote .conf files if version is newer or local is missing
+      if (remoteVersion > localVersion || serversMap.isEmpty) {
         for (final item in serverListJson) {
           final serverMap = item as Map<String, dynamic>;
           final String fileName =
-              serverMap['file_name'] as String? ?? 'us_newyork.conf';
+              serverMap['file_name'] as String? ?? 'us1.conf';
           final String confUrl = '${AppConstants.githubRawBaseUrl}/$fileName';
 
           String confContent = '';
           try {
             confContent = await _apiClient.fetchRawText(confUrl);
-            final File localConfFile = File('${configDir.path}/$fileName');
+            final File localConfFile = File(p.join(configDir.path, fileName));
             await localConfFile.writeAsString(confContent);
           } catch (_) {
-            // If fetching individual .conf fails, check if we have a locally saved copy
-            final File localConfFile = File('${configDir.path}/$fileName');
+            final File localConfFile = File(p.join(configDir.path, fileName));
             if (await localConfFile.exists()) {
               confContent = await localConfFile.readAsString();
             } else {
@@ -75,62 +74,65 @@ class ConfigRepository {
             }
           }
 
-          final server = ServerModel.fromJson(serverMap, confContent: confContent);
-          updatedServers.add(server);
+          final server = ServerModel.fromWgConfigContent(
+            fileName: fileName,
+            confContent: confContent,
+            manifestOverride: serverMap,
+          );
+          serversMap[fileName] = server;
         }
 
-        // Save new manifest JSON and version to SharedPreferences & disk
         await prefs.setInt(AppConstants.prefManifestVersion, remoteVersion);
         await prefs.setString(
             AppConstants.prefCachedManifestJson, jsonEncode(remoteJson));
+      }
+    } catch (_) {
+      // Offline / Network error -> continue with locally scanned files
+    }
 
-        if (updatedServers.isNotEmpty) {
-          return await _updateServerPings(updatedServers);
+    // Rescan local configs directory to ensure all user-added or downloaded .conf files are included
+    try {
+      final localScanned = await _scanLocalConfigsDirectory();
+      for (final server in localScanned) {
+        if (!serversMap.containsKey(server.fileName)) {
+          serversMap[server.fileName] = server;
         }
       }
-    } catch (e) {
-      // Remote sync unreachable or network offline -> Fallback gracefully
+    } catch (_) {}
+
+    final List<ServerModel> finalServers = serversMap.values.toList();
+
+    if (finalServers.isNotEmpty) {
+      return await _updateServerPings(finalServers);
     }
 
-    // If cached servers exist, return cached servers with updated pings
-    if (cachedServers.isNotEmpty) {
-      return await _updateServerPings(cachedServers);
-    }
-
-    // Step 3: Fallback to bundled asset manifest and .conf
+    // Step 3: Fallback to bundled asset manifest & conf if nothing was found
     return await _loadFromAssetBundle();
   }
 
-  /// Loads cached manifest and config files from local persistent storage
-  Future<List<ServerModel>> _loadFromLocalDisk() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? cachedJsonStr =
-        prefs.getString(AppConstants.prefCachedManifestJson);
-    if (cachedJsonStr == null || cachedJsonStr.isEmpty) {
-      return [];
-    }
-
-    final Map<String, dynamic> manifestJson = jsonDecode(cachedJsonStr);
-    final List<dynamic> serversList = manifestJson['servers'] as List<dynamic>? ?? [];
+  /// Automatically scans local vpn_configs directory for all .conf files
+  Future<List<ServerModel>> _scanLocalConfigsDirectory() async {
     final Directory configDir = await _getConfigsDirectory();
+    final List<FileSystemEntity> entities = await configDir.list().toList();
 
-    final List<ServerModel> result = [];
-    for (final item in serversList) {
-      final map = item as Map<String, dynamic>;
-      final String fileName = map['file_name'] as String? ?? 'us_newyork.conf';
-      final File confFile = File('${configDir.path}/$fileName');
+    final List<ServerModel> scanned = [];
 
-      String confContent = '';
-      if (await confFile.exists()) {
-        confContent = await confFile.readAsString();
-      } else {
-        confContent = await _getFallbackConfContent();
+    for (final entity in entities) {
+      if (entity is File && entity.path.toLowerCase().endsWith('.conf')) {
+        try {
+          final String fileName = p.basename(entity.path);
+          final String content = await entity.readAsString();
+          if (content.isNotEmpty) {
+            scanned.add(ServerModel.fromWgConfigContent(
+              fileName: fileName,
+              confContent: content,
+            ));
+          }
+        } catch (_) {}
       }
-
-      result.add(ServerModel.fromJson(map, confContent: confContent));
     }
 
-    return result;
+    return scanned;
   }
 
   /// Loads fallback server configuration from flutter asset bundle
@@ -145,45 +147,20 @@ class ConfigRepository {
       final List<ServerModel> result = [];
       for (final item in serversList) {
         final map = item as Map<String, dynamic>;
-        result.add(ServerModel.fromJson(map, confContent: fallbackConf));
+        final String fileName = map['file_name'] as String? ?? 'us1.conf';
+        result.add(ServerModel.fromWgConfigContent(
+          fileName: fileName,
+          confContent: fallbackConf,
+          manifestOverride: map,
+        ));
       }
       return await _updateServerPings(result);
     } catch (_) {
-      // Fallback emergency inline model
       final fallbackConf = await _getFallbackConfContent();
       return [
-        ServerModel(
-          id: 'us-01',
-          country: 'United States',
-          city: 'New York',
-          flagCode: 'US',
-          fileName: 'us_newyork.conf',
-          isPro: false,
-          endpoint: 'us1.vpnbook.com:443',
+        ServerModel.fromWgConfigContent(
+          fileName: 'us1.conf',
           confContent: fallbackConf,
-          pingMs: 28,
-        ),
-        ServerModel(
-          id: 'uk-01',
-          country: 'United Kingdom',
-          city: 'London',
-          flagCode: 'GB',
-          fileName: 'uk_london.conf',
-          isPro: false,
-          endpoint: 'uk1.vpnbook.com:443',
-          confContent: fallbackConf,
-          pingMs: 42,
-        ),
-        ServerModel(
-          id: 'de-01',
-          country: 'Germany',
-          city: 'Frankfurt',
-          flagCode: 'DE',
-          fileName: 'de_frankfurt.conf',
-          isPro: true,
-          endpoint: 'de1.vpnbook.com:443',
-          confContent: fallbackConf,
-          pingMs: 38,
         ),
       ];
     }
@@ -194,14 +171,14 @@ class ConfigRepository {
       return await rootBundle.loadString(AppConstants.fallbackConfAsset);
     } catch (_) {
       return '''[Interface]
-PrivateKey = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa=
-Address = 10.0.0.2/32
+PrivateKey = IF+YRhEIX8jaFRsRFPBj+7/tx2hE7ovRtBc7jFPjbXc=
+Address = 10.104.7.160/32
 DNS = 1.1.1.1, 8.8.8.8
 
 [Peer]
-PublicKey = bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb=
+PublicKey = YLaLJahXZ6NuASXQLPl0eUPVAypirpaLuuO7tZa2bmo=
 AllowedIPs = 0.0.0.0/0, ::/0
-Endpoint = us1.vpnbook.com:443
+Endpoint = 147.135.15.16:443
 PersistentKeepalive = 25''';
     }
   }
