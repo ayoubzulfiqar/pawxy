@@ -6,7 +6,6 @@ import '../../../vpn/presentation/cubit/vpn_cubit.dart';
 import '../../../vpn/presentation/cubit/vpn_state.dart';
 import '../cubit/server_cubit.dart';
 import '../cubit/server_state.dart';
-import '../widgets/premium_banner.dart';
 import '../widgets/server_card.dart';
 
 class ServersScreen extends StatefulWidget {
@@ -40,12 +39,12 @@ class _ServersScreenState extends State<ServersScreen> {
         title: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(6),
               child: Image.asset(
                 AppConstants.mascotLogoAsset,
                 width: 28,
                 height: 28,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
               ),
             ),
             const SizedBox(width: 10),
@@ -90,19 +89,19 @@ class _ServersScreenState extends State<ServersScreen> {
                       : null,
                   filled: true,
                   fillColor: AppColors.cardSurface(isDark),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide(color: AppColors.cardBorder(isDark)),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide(color: AppColors.cardBorder(isDark)),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(10),
                     borderSide:
-                        const BorderSide(color: AppColors.electricBlue),
+                        const BorderSide(color: AppColors.pawxyOrange),
                   ),
                 ),
                 onChanged: (query) {
@@ -117,26 +116,18 @@ class _ServersScreenState extends State<ServersScreen> {
                   final String currentCategory =
                       (state is ServerLoaded) ? state.selectedCategory : 'All';
 
-                  return Row(
-                    children: [
-                      _buildFilterChip('All', currentCategory, isDark),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('Free', currentCategory, isDark),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('Pro', currentCategory, isDark),
-                    ],
-                  );
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              PremiumBanner(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Pawxy Premium coming soon!'),
-                      backgroundColor: AppColors.electricBlue,
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildFilterChip('All', currentCategory, isDark),
+                        const SizedBox(width: 8),
+                        _buildFilterChip('Americas', currentCategory, isDark),
+                        const SizedBox(width: 8),
+                        _buildFilterChip('Europe', currentCategory, isDark),
+                        const SizedBox(width: 8),
+                        _buildFilterChip('Asia-Pacific', currentCategory, isDark),
+                      ],
                     ),
                   );
                 },
@@ -150,7 +141,7 @@ class _ServersScreenState extends State<ServersScreen> {
                     if (serverState is ServerLoading) {
                       return const Center(
                         child: CircularProgressIndicator(
-                          color: AppColors.electricBlue,
+                          color: AppColors.pawxyOrange,
                         ),
                       );
                     }
@@ -180,6 +171,7 @@ class _ServersScreenState extends State<ServersScreen> {
                         builder: (context, vpnState) {
                           return ListView.builder(
                             physics: const BouncingScrollPhysics(),
+                            padding: const EdgeInsets.only(bottom: 24),
                             itemCount: servers.length,
                             itemBuilder: (context, index) {
                               final server = servers[index];
@@ -220,7 +212,7 @@ class _ServersScreenState extends State<ServersScreen> {
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
-      selectedColor: AppColors.electricBlue,
+      selectedColor: AppColors.pawxyOrange,
       backgroundColor: AppColors.cardSurface(isDark),
       labelStyle: TextStyle(
         color: isSelected
@@ -230,9 +222,9 @@ class _ServersScreenState extends State<ServersScreen> {
         fontSize: 13,
       ),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         side: BorderSide(
-          color: isSelected ? AppColors.electricBlue : AppColors.cardBorder(isDark),
+          color: isSelected ? AppColors.pawxyOrange : AppColors.cardBorder(isDark),
         ),
       ),
       onSelected: (selected) {
