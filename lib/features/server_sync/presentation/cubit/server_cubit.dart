@@ -90,10 +90,19 @@ class ServerCubit extends Cubit<ServerState> {
           server.city.toLowerCase().contains(query.toLowerCase());
 
       bool matchesCategory = true;
-      if (category == 'Free') {
-        matchesCategory = !server.isPro;
-      } else if (category == 'Pro') {
-        matchesCategory = server.isPro;
+      if (category == 'Americas') {
+        final country = server.country.toLowerCase();
+        matchesCategory = country.contains('united states') || country.contains('canada');
+      } else if (category == 'Europe') {
+        final country = server.country.toLowerCase();
+        matchesCategory = country.contains('united kingdom') ||
+            country.contains('germany') ||
+            country.contains('france') ||
+            country.contains('netherlands') ||
+            country.contains('poland');
+      } else if (category == 'Asia-Pacific') {
+        final country = server.country.toLowerCase();
+        matchesCategory = country.contains('japan') || country.contains('australia');
       }
 
       return matchesQuery && matchesCategory;
