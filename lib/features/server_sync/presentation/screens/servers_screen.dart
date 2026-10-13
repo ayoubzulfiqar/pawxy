@@ -56,7 +56,7 @@ class _ServersScreenState extends State<ServersScreen> {
             icon: const Icon(Icons.refresh_rounded),
             tooltip: 'Sync Servers',
             onPressed: () {
-              context.read<ServerCubit>().loadServers();
+              context.read<ServerCubit>().loadServers(forceSync: true);
             },
           ),
           const SizedBox(width: 8),
