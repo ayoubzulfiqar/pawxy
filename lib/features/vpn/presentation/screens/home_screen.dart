@@ -32,12 +32,12 @@ class HomeScreen extends StatelessWidget {
         title: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(6),
               child: Image.asset(
                 AppConstants.mascotLogoAsset,
                 width: 32,
                 height: 32,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
               ),
             ),
             const SizedBox(width: 10),
@@ -94,7 +94,7 @@ class HomeScreen extends StatelessWidget {
                             horizontal: 16, vertical: 6),
                         decoration: BoxDecoration(
                           color: AppColors.cardSurfaceElevated(isDark),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: AppColors.cardBorder(isDark)),
                         ),
                         child: Text(
