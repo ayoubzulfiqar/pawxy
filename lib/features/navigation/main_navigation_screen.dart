@@ -50,26 +50,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           currentIndex: _currentIndex,
           onTap: _navigateToTab,
           backgroundColor: AppColors.backgroundSecondary(isDark),
-          selectedItemColor: AppColors.electricBlue,
+          selectedItemColor: AppColors.pawxyOrange,
           unselectedItemColor: AppColors.textMuted(isDark),
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.power_settings_new_rounded),
               activeIcon: Icon(Icons.power_settings_new_rounded,
-                  color: AppColors.electricBlue),
+                  color: AppColors.pawxyOrange),
               label: 'Connect',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.bolt_rounded),
               activeIcon:
-                  Icon(Icons.bolt_rounded, color: AppColors.electricBlue),
+                  Icon(Icons.bolt_rounded, color: AppColors.pawxyOrange),
               label: 'Speed Test',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.dns_rounded),
               activeIcon:
-                  Icon(Icons.dns_rounded, color: AppColors.electricBlue),
+                  Icon(Icons.dns_rounded, color: AppColors.pawxyOrange),
               label: 'Servers',
             ),
           ],
