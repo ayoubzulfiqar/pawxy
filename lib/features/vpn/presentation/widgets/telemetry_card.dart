@@ -16,43 +16,45 @@ class TelemetryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      decoration: BoxDecoration(
-        color: AppColors.cardSurface(isDark),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.cardBorder(isDark), width: 1),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildSpeedItem(
-              context: context,
-              title: 'Download',
-              speedText: Formatters.formatSpeed(downloadSpeed),
-              icon: Icons.arrow_downward_rounded,
-              iconColor: AppColors.emeraldGreen,
-              isDark: isDark,
+    return RepaintBoundary(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: AppColors.cardSurface(isDark),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.cardBorder(isDark), width: 1),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _buildSpeedItem(
+                context: context,
+                title: 'Download',
+                speedText: Formatters.formatSpeed(downloadSpeed),
+                icon: Icons.arrow_downward_rounded,
+                iconColor: AppColors.emeraldGreen,
+                isDark: isDark,
+              ),
             ),
-          ),
 
-          Container(
-            height: 38,
-            width: 1,
-            color: AppColors.cardBorder(isDark),
-          ),
-
-          Expanded(
-            child: _buildSpeedItem(
-              context: context,
-              title: 'Upload',
-              speedText: Formatters.formatSpeed(uploadSpeed),
-              icon: Icons.arrow_upward_rounded,
-              iconColor: AppColors.pawxyOrange,
-              isDark: isDark,
+            Container(
+              height: 38,
+              width: 1,
+              color: AppColors.cardBorder(isDark),
             ),
-          ),
-        ],
+
+            Expanded(
+              child: _buildSpeedItem(
+                context: context,
+                title: 'Upload',
+                speedText: Formatters.formatSpeed(uploadSpeed),
+                icon: Icons.arrow_upward_rounded,
+                iconColor: AppColors.pawxyOrange,
+                isDark: isDark,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
