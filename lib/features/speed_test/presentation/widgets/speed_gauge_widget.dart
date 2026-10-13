@@ -23,61 +23,63 @@ class SpeedGaugeWidget extends StatelessWidget {
     // Calculate speed fraction relative to scale (0.0 to 1.0)
     final double speedFraction = (speedMbps / maxSpeedMbps).clamp(0.0, 1.0);
 
-    return SizedBox(
-      width: 250,
-      height: 250,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CustomPaint(
-            size: const Size(250, 250),
-            painter: _GaugePainter(
-              speedFraction: speedFraction,
-              testProgress: progress,
-              isDark: isDark,
+    return RepaintBoundary(
+      child: SizedBox(
+        width: 250,
+        height: 250,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            CustomPaint(
+              size: const Size(250, 250),
+              painter: _GaugePainter(
+                speedFraction: speedFraction,
+                testProgress: progress,
+                isDark: isDark,
+              ),
             ),
-          ),
 
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.pawxyOrange.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  phaseLabel.toUpperCase(),
-                  style: const TextStyle(
-                    color: AppColors.pawxyOrange,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.pawxyOrange.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    phaseLabel.toUpperCase(),
+                    style: const TextStyle(
+                      color: AppColors.pawxyOrange,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                speedMbps > 0 ? speedMbps.toStringAsFixed(1) : '0.0',
-                style: TextStyle(
-                  color: AppColors.textPrimary(isDark),
-                  fontSize: 46,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -1,
+                const SizedBox(height: 8),
+                Text(
+                  speedMbps > 0 ? speedMbps.toStringAsFixed(1) : '0.0',
+                  style: TextStyle(
+                    color: AppColors.textPrimary(isDark),
+                    fontSize: 46,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -1,
+                  ),
                 ),
-              ),
-              const Text(
-                'Mbps',
-                style: TextStyle(
-                  color: AppColors.pawxyOrange,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+                const Text(
+                  'Mbps',
+                  style: TextStyle(
+                    color: AppColors.pawxyOrange,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
