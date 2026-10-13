@@ -22,11 +22,11 @@ class ServerCard extends StatelessWidget {
 
     Color latencyColor;
     int barsCount;
-    if (server.pingMs < 50) {
+    if (server.pingMs < 60) {
       latencyColor = AppColors.emeraldGreen;
       barsCount = 3;
-    } else if (server.pingMs < 100) {
-      latencyColor = AppColors.amberGold;
+    } else if (server.pingMs < 130) {
+      latencyColor = AppColors.pawxyGold;
       barsCount = 2;
     } else {
       latencyColor = AppColors.crimsonRed;
@@ -35,22 +35,22 @@ class ServerCard extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: isSelected
             ? AppColors.cardSurfaceElevated(isDark)
             : AppColors.cardSurface(isDark),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isSelected ? AppColors.electricBlue : AppColors.cardBorder(isDark),
+          color: isSelected ? AppColors.pawxyOrange : AppColors.cardBorder(isDark),
           width: isSelected ? 1.5 : 1,
         ),
       ),
       child: Row(
         children: [
           Container(
-            width: 44,
-            height: 44,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
               color: AppColors.backgroundSecondary(isDark),
               shape: BoxShape.circle,
@@ -59,79 +59,60 @@ class ServerCard extends StatelessWidget {
             child: Center(
               child: Text(
                 server.flagEmoji,
-                style: const TextStyle(fontSize: 22),
+                style: const TextStyle(fontSize: 20),
               ),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
 
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      server.country,
-                      style: TextStyle(
-                        color: AppColors.textPrimary(isDark),
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (server.isPro) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.amberGold.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          'PRO',
-                          style: TextStyle(
-                            color: AppColors.amberGold,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
+                Text(
+                  server.country,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: AppColors.textPrimary(isDark),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                const SizedBox(height: 3),
-                Row(
-                  children: [
-                    Text(
-                      '${server.city} • 25 locations',
-                      style: TextStyle(
-                        color: AppColors.textSecondary(isDark),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 2),
+                Text(
+                  '${server.city} • WireGuard',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: AppColors.textSecondary(isDark),
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
           ),
 
+          const SizedBox(width: 8),
+
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               _buildSignalBars(barsCount, latencyColor, isDark),
-              const SizedBox(width: 6),
+              const SizedBox(width: 4),
               Text(
                 '${server.pingMs}ms',
                 style: TextStyle(
                   color: latencyColor,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
 
-          const SizedBox(width: 14),
+          const SizedBox(width: 10),
 
           _buildActionButton(context),
         ],
@@ -161,7 +142,7 @@ class ServerCard extends StatelessWidget {
   Widget _buildActionButton(BuildContext context) {
     if (isSelected && isConnected) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: AppColors.emeraldGreen.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(10),
@@ -171,62 +152,36 @@ class ServerCard extends StatelessWidget {
           'Connected',
           style: TextStyle(
             color: AppColors.emeraldGreen,
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: FontWeight.bold,
           ),
         ),
       );
     }
 
-    if (server.isPro) {
-      return SizedBox(
-        height: 34,
-        child: OutlinedButton(
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.amberGold,
-            side: const BorderSide(color: AppColors.amberGold),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-          ),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Pro server. Upgrade to unlock all servers!'),
-                backgroundColor: AppColors.amberGold,
-              ),
-            );
-          },
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.lock_outline_rounded, size: 14),
-              SizedBox(width: 4),
-              Text('Unlock', style: TextStyle(fontSize: 12)),
-            ],
-          ),
-        ),
-      );
-    }
-
     return SizedBox(
-      height: 34,
+      height: 32,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.electricBlue,
+          backgroundColor: isSelected
+              ? AppColors.pawxyOrange.withValues(alpha: 0.15)
+              : AppColors.pawxyOrange,
+          foregroundColor: isSelected ? AppColors.pawxyOrange : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
+            side: isSelected
+                ? const BorderSide(color: AppColors.pawxyOrange)
+                : BorderSide.none,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           elevation: 0,
         ),
         onPressed: onSelect,
         child: Text(
-          isSelected ? 'Selected' : 'Connect',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
+          isSelected ? 'Selected' : 'Select',
+          style: TextStyle(
+            color: isSelected ? AppColors.pawxyOrange : Colors.white,
+            fontSize: 11,
             fontWeight: FontWeight.bold,
           ),
         ),
