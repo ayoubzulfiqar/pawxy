@@ -13,7 +13,7 @@ class ApiClient {
         Uri.parse(url),
         headers: {
           'Accept': 'application/json, text/plain, */*',
-          'User-Agent': 'VPN-Guard-Client/1.0',
+          'User-Agent': 'Pawxy-VPN-Client/1.0',
         },
       ).timeout(const Duration(seconds: 10));
 
