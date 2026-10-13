@@ -1,0 +1,51 @@
+{
+  "version": 104,
+  "updated_at": "2026-10-12T00:00:00Z",
+  "servers": [
+    {
+      "id": "us-01",
+      "country": "United States",
+      "city": "New York",
+      "flag_code": "US",
+      "file_name": "us_newyork.conf",
+      "is_pro": false,
+      "endpoint": "us1.vpnbook.com:443"
+    },
+    {
+      "id": "uk-01",
+      "country": "United Kingdom",
+      "city": "London",
+      "flag_code": "GB",
+      "file_name": "uk_london.conf",
+      "is_pro": false,
+      "endpoint": "uk1.vpnbook.com:443"
+    },
+    {
+      "id": "de-01",
+      "country": "Germany",
+      "city": "Frankfurt",
+      "flag_code": "DE",
+      "file_name": "de_frankfurt.conf",
+      "is_pro": true,
+      "endpoint": "de1.vpnbook.com:443"
+    },
+    {
+      "id": "jp-01",
+      "country": "Japan",
+      "city": "Tokyo",
+      "flag_code": "JP",
+      "file_name": "jp_tokyo.conf",
+      "is_pro": true,
+      "endpoint": "jp1.vpnbook.com:443"
+    },
+    {
+      "id": "au-01",
+      "country": "Australia",
+      "city": "Sydney",
+      "flag_code": "AU",
+      "file_name": "au_sydney.conf",
+      "is_pro": true,
+      "endpoint": "au1.vpnbook.com:443"
+    }
+  ]
+}
