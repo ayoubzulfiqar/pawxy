@@ -1,12 +1,13 @@
 class AppConstants {
-  static const String appName = 'VPN Guard';
+  static const String appName = 'Pawxy VPN';
   
   // GitHub Raw Config URLs
   static const String githubRawBaseUrl =
-      'https://raw.githubusercontent.com/pawxy-vpn/vpn-configs/main/conf';
+      'https://raw.githubusercontent.com/ayoubzulfiqar/pawxy/main/conf';
   static const String manifestUrl = '$githubRawBaseUrl/manifest.json';
 
   // Fallback Asset Paths
+  static const String mascotLogoAsset = 'assets/pawxy.png';
   static const String fallbackManifestAsset = 'assets/fallback_manifest.json';
   static const String fallbackConfAsset = 'assets/fallback_us.conf';
 
@@ -17,9 +18,9 @@ class AppConstants {
 
   // WireGuard Interface Config
   static const String wgInterfaceName = 'wg0';
-  static const String iosAppGroup = 'group.com.yourcompany.vpnguard';
+  static const String iosAppGroup = 'group.com.ayoubzulfiqar.pawxy';
   static const String macosExtensionBundleId =
-      'com.yourcompany.vpnguard.network-extension';
+      'com.ayoubzulfiqar.pawxy.network-extension';
   static const String iosProviderBundleIdentifier =
-      'com.yourcompany.vpnguard.network-extension';
+      'com.ayoubzulfiqar.pawxy.network-extension';
 }
