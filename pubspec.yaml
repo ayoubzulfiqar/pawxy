@@ -2,7 +2,7 @@ name: pawxy
 description: "Enterprise-Grade WireGuard VPN Client"
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.6.9+169
 
 environment:
   sdk: ^3.13.5
