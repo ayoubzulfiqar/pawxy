@@ -15,6 +15,7 @@ class AppConstants {
   static const String prefManifestVersion = 'pref_manifest_version';
   static const String prefCachedManifestJson = 'pref_cached_manifest_json';
   static const String prefSelectedServerId = 'pref_selected_server_id';
+  static const String prefLastSyncTimestamp = 'pref_last_sync_timestamp';
 
   // WireGuard Interface Config
   static const String wgInterfaceName = 'wg0';
