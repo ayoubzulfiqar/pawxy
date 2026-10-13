@@ -25,25 +25,18 @@ class SpeedTestScreen extends StatelessWidget {
         title: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(6),
               child: Image.asset(
                 AppConstants.mascotLogoAsset,
                 width: 28,
                 height: 28,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
               ),
             ),
             const SizedBox(width: 10),
             const Text('Speed Test'),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert_rounded),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 8),
-        ],
       ),
       body: BlocBuilder<ServerCubit, ServerState>(
         builder: (context, serverState) {
@@ -100,7 +93,7 @@ class SpeedTestScreen extends StatelessWidget {
                                   horizontal: 16, vertical: 12),
                               decoration: BoxDecoration(
                                 color: AppColors.cardSurface(isDark),
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                     color: AppColors.cardBorder(isDark),
                                     width: 1),
@@ -141,7 +134,7 @@ class SpeedTestScreen extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       color: AppColors.emeraldGreen
                                           .withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Row(
                                       children: [
@@ -181,7 +174,7 @@ class SpeedTestScreen extends StatelessWidget {
                                 horizontal: 20, vertical: 16),
                             decoration: BoxDecoration(
                               color: AppColors.cardSurface(isDark),
-                              borderRadius: BorderRadius.circular(18),
+                              borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: AppColors.cardBorder(isDark)),
                             ),
                             child: Row(
@@ -205,7 +198,7 @@ class SpeedTestScreen extends StatelessWidget {
                                   title: 'Upload',
                                   value: Formatters.formatMbps(uploadMbps),
                                   icon: Icons.arrow_upward_rounded,
-                                  iconColor: AppColors.electricBlue,
+                                  iconColor: AppColors.pawxyOrange,
                                   isDark: isDark,
                                 ),
                               ],
@@ -216,14 +209,14 @@ class SpeedTestScreen extends StatelessWidget {
 
                           SizedBox(
                             width: double.infinity,
-                            height: 56,
+                            height: 52,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: isTesting
                                     ? AppColors.cardSurfaceElevated(isDark)
-                                    : AppColors.electricBlue,
+                                    : AppColors.pawxyOrange,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
                                 elevation: 0,
                               ),
