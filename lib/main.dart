@@ -22,17 +22,17 @@ void main() async {
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Color(0xFF13151B),
-      systemNavigationBarIconBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Color(0xFFF6F8FC),
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
 
-  runApp(const VpnGuardApp());
+  runApp(const PawxyApp());
 }
 
-class VpnGuardApp extends StatelessWidget {
-  const VpnGuardApp({super.key});
+class PawxyApp extends StatelessWidget {
+  const PawxyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class VpnGuardApp extends StatelessWidget {
         child: BlocBuilder<ThemeCubit, ThemeMode>(
           builder: (context, themeMode) {
             return MaterialApp(
-              title: 'VPN Guard',
+              title: 'Pawxy VPN',
               debugShowCheckedModeBanner: false,
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
