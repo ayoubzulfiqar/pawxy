@@ -65,85 +65,87 @@ class _HeroPowerButtonState extends State<HeroPowerButton>
       iconColor = AppColors.textMuted(isDark);
     }
 
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: AnimatedBuilder(
-        animation: _pulseAnimation,
-        builder: (context, child) {
-          final double scale = (isConnected || isConnecting)
-              ? _pulseAnimation.value
-              : 1.0;
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedBuilder(
+          animation: _pulseAnimation,
+          builder: (context, child) {
+            final double scale = (isConnected || isConnecting)
+                ? _pulseAnimation.value
+                : 1.0;
 
-          return SizedBox(
-            width: 220,
-            height: 220,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Transform.scale(
-                  scale: scale,
-                  child: Container(
-                    width: 210,
-                    height: 210,
+            return SizedBox(
+              width: 220,
+              height: 220,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Transform.scale(
+                    scale: scale,
+                    child: Container(
+                      width: 210,
+                      height: 210,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: glowColor,
+                        boxShadow: [
+                          if (isConnected || isConnecting)
+                            BoxShadow(
+                              color: isConnected
+                                  ? AppColors.emeraldGreen.withValues(alpha: 0.35)
+                                  : AppColors.pawxyOrange.withValues(alpha: 0.35),
+                              blurRadius: 40,
+                              spreadRadius: 10,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  Container(
+                    width: 170,
+                    height: 170,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: glowColor,
+                      color: AppColors.powerInactiveOuter(isDark),
+                      border: Border.all(
+                        color: isConnected
+                            ? AppColors.emeraldGreen.withValues(alpha: 0.5)
+                            : isConnecting
+                                ? AppColors.pawxyOrange.withValues(alpha: 0.5)
+                                : AppColors.cardBorder(isDark),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 350),
+                    width: 130,
+                    height: 130,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: buttonColor,
                       boxShadow: [
-                        if (isConnected || isConnecting)
-                          BoxShadow(
-                            color: isConnected
-                                ? AppColors.emeraldGreen.withValues(alpha: 0.35)
-                                : AppColors.pawxyOrange.withValues(alpha: 0.35),
-                            blurRadius: 40,
-                            spreadRadius: 10,
-                          ),
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.15),
+                          blurRadius: 15,
+                          offset: const Offset(0, 6),
+                        ),
                       ],
                     ),
-                  ),
-                ),
-
-                Container(
-                  width: 170,
-                  height: 170,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.powerInactiveOuter(isDark),
-                    border: Border.all(
-                      color: isConnected
-                          ? AppColors.emeraldGreen.withValues(alpha: 0.5)
-                          : isConnecting
-                              ? AppColors.pawxyOrange.withValues(alpha: 0.5)
-                              : AppColors.cardBorder(isDark),
-                      width: 2,
+                    child: Icon(
+                      Icons.power_settings_new_rounded,
+                      size: 58,
+                      color: iconColor,
                     ),
                   ),
-                ),
-
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 350),
-                  width: 130,
-                  height: 130,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: buttonColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.15),
-                        blurRadius: 15,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.power_settings_new_rounded,
-                    size: 58,
-                    color: iconColor,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
