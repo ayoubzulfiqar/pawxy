@@ -1,51 +1,42 @@
 {
-  "version": 104,
+  "version": 105,
   "updated_at": "2026-10-12T00:00:00Z",
   "servers": [
     {
       "id": "us-01",
       "country": "United States",
-      "city": "New York",
+      "city": "US Server 1",
       "flag_code": "US",
-      "file_name": "us_newyork.conf",
+      "file_name": "us1.conf",
       "is_pro": false,
-      "endpoint": "us1.vpnbook.com:443"
+      "endpoint": "147.135.15.16:443"
     },
     {
-      "id": "uk-01",
-      "country": "United Kingdom",
-      "city": "London",
-      "flag_code": "GB",
-      "file_name": "uk_london.conf",
+      "id": "us-02",
+      "country": "United States",
+      "city": "US Server 2",
+      "flag_code": "US",
+      "file_name": "us2.conf",
       "is_pro": false,
-      "endpoint": "uk1.vpnbook.com:443"
+      "endpoint": "147.135.37.178:443"
     },
     {
-      "id": "de-01",
-      "country": "Germany",
-      "city": "Frankfurt",
-      "flag_code": "DE",
-      "file_name": "de_frankfurt.conf",
-      "is_pro": true,
-      "endpoint": "de1.vpnbook.com:443"
+      "id": "ca-01",
+      "country": "Canada",
+      "city": "CA Server 1",
+      "flag_code": "CA",
+      "file_name": "can1.conf",
+      "is_pro": false,
+      "endpoint": "144.217.253.149:443"
     },
     {
-      "id": "jp-01",
-      "country": "Japan",
-      "city": "Tokyo",
-      "flag_code": "JP",
-      "file_name": "jp_tokyo.conf",
+      "id": "ca-02",
+      "country": "Canada",
+      "city": "CA Server 2",
+      "flag_code": "CA",
+      "file_name": "can2.conf",
       "is_pro": true,
-      "endpoint": "jp1.vpnbook.com:443"
-    },
-    {
-      "id": "au-01",
-      "country": "Australia",
-      "city": "Sydney",
-      "flag_code": "AU",
-      "file_name": "au_sydney.conf",
-      "is_pro": true,
-      "endpoint": "au1.vpnbook.com:443"
+      "endpoint": "142.4.216.196:443"
     }
   ]
 }
