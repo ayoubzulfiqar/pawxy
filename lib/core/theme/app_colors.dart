@@ -25,15 +25,15 @@ class AppColors {
   static const Color darkPowerInactiveOuter = Color(0xFF1B1E2B);
   static const Color darkPowerInactiveInner = Color(0xFF232838);
 
-  // Light Palette (Warm Soft Cream / White)
-  static const Color lightBackground = Color(0xFFF6F8FC);
+  // Light Palette (Clean Crisp Light Background)
+  static const Color lightBackground = Color(0xFFF5F7FA);
   static const Color lightBackgroundSecondary = Color(0xFFFFFFFF);
   static const Color lightCardSurface = Color(0xFFFFFFFF);
-  static const Color lightCardSurfaceElevated = Color(0xFFEEF2FA);
-  static const Color lightCardBorder = Color(0xFFE2E7F0);
-  static const Color lightTextPrimary = Color(0xFF12151C);
-  static const Color lightTextSecondary = Color(0xFF5A6072);
-  static const Color lightTextMuted = Color(0xFF9299A9);
+  static const Color lightCardSurfaceElevated = Color(0xFFEDF2FA);
+  static const Color lightCardBorder = Color(0xFFE2E8F0);
+  static const Color lightTextPrimary = Color(0xFF0F141D);
+  static const Color lightTextSecondary = Color(0xFF535C6E);
+  static const Color lightTextMuted = Color(0xFF8C95A6);
   static const Color lightPowerInactiveOuter = Color(0xFFEBF0F9);
   static const Color lightPowerInactiveInner = Color(0xFFFFFFFF);
 
