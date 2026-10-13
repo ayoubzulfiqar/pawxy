@@ -33,89 +33,91 @@ class ServerCard extends StatelessWidget {
       barsCount = 1;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? AppColors.cardSurfaceElevated(isDark)
-            : AppColors.cardSurface(isDark),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: isSelected ? AppColors.pawxyOrange : AppColors.cardBorder(isDark),
-          width: isSelected ? 1.5 : 1,
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.cardSurfaceElevated(isDark)
+              : AppColors.cardSurface(isDark),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? AppColors.pawxyOrange : AppColors.cardBorder(isDark),
+            width: isSelected ? 1.5 : 1,
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: AppColors.backgroundSecondary(isDark),
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.cardBorder(isDark)),
-            ),
-            child: Center(
-              child: Text(
-                server.flagEmoji,
-                style: const TextStyle(fontSize: 20),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundSecondary(isDark),
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.cardBorder(isDark)),
+              ),
+              child: Center(
+                child: Text(
+                  server.flagEmoji,
+                  style: const TextStyle(fontSize: 20),
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
+            const SizedBox(width: 12),
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    server.country,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: AppColors.textPrimary(isDark),
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${server.city} • WireGuard',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: AppColors.textSecondary(isDark),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: 8),
+
+            Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                _buildSignalBars(barsCount, latencyColor, isDark),
+                const SizedBox(width: 4),
                 Text(
-                  server.country,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  '${server.pingMs}ms',
                   style: TextStyle(
-                    color: AppColors.textPrimary(isDark),
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${server.city} • WireGuard',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: AppColors.textSecondary(isDark),
-                    fontSize: 12,
+                    color: latencyColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
-          ),
 
-          const SizedBox(width: 8),
+            const SizedBox(width: 10),
 
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildSignalBars(barsCount, latencyColor, isDark),
-              const SizedBox(width: 4),
-              Text(
-                '${server.pingMs}ms',
-                style: TextStyle(
-                  color: latencyColor,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(width: 10),
-
-          _buildActionButton(context),
-        ],
+            _buildActionButton(context),
+          ],
+        ),
       ),
     );
   }
