@@ -12,10 +12,10 @@ class ServerCubit extends Cubit<ServerState> {
       : _configRepository = configRepository ?? ConfigRepository(),
         super(ServerInitial());
 
-  Future<void> loadServers() async {
+  Future<void> loadServers({bool forceSync = false}) async {
     emit(ServerLoading());
     try {
-      final servers = await _configRepository.loadAndSyncServers();
+      final servers = await _configRepository.loadAndSyncServers(forceSync: forceSync);
       if (servers.isEmpty) {
         emit(const ServerError('No VPN servers available'));
         return;
@@ -32,14 +32,42 @@ class ServerCubit extends Cubit<ServerState> {
         }
       }
 
+      final filtered = _applyFilters(servers, '', 'All');
+
       emit(ServerLoaded(
         allServers: servers,
-        filteredServers: servers,
+        filteredServers: filtered,
         selectedServer: selected,
       ));
+
+      // Trigger non-blocking background latency refresh
+      _refreshPingsInBackground(servers);
     } catch (e) {
       emit(ServerError('Failed to load server list: $e'));
     }
+  }
+
+  void _refreshPingsInBackground(List<ServerModel> currentServers) async {
+    try {
+      final updatedServers = await _configRepository.updateServerPingsAsync(currentServers);
+      final currentState = state;
+      if (currentState is ServerLoaded) {
+        final updatedSelected = updatedServers.firstWhere(
+          (s) => s.id == currentState.selectedServer.id,
+          orElse: () => currentState.selectedServer,
+        );
+        final filtered = _applyFilters(
+          updatedServers,
+          currentState.searchQuery,
+          currentState.selectedCategory,
+        );
+        emit(currentState.copyWith(
+          allServers: updatedServers,
+          filteredServers: filtered,
+          selectedServer: updatedSelected,
+        ));
+      }
+    } catch (_) {}
   }
 
   void selectServer(ServerModel server) async {
