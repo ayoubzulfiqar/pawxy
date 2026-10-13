@@ -17,6 +17,7 @@ class VpnCubit extends Cubit<VpnState> {
   num _lastRxBytes = 0;
   num _lastTxBytes = 0;
   DateTime _lastTrafficTime = DateTime.now();
+  bool _hasRealTrafficReceived = false;
 
   VpnCubit({WireGuardRepository? vpnRepository})
       : _vpnRepository = vpnRepository ?? WireGuardRepository(),
@@ -49,22 +50,34 @@ class VpnCubit extends Cubit<VpnState> {
   }
 
   void _handleTrafficStats(Map<String, dynamic> stats) {
+    if (stats.isEmpty) return;
+
     final num rx = stats['totalDownload'] ?? stats['rx_bytes'] ?? stats['download'] ?? 0;
     final num tx = stats['totalUpload'] ?? stats['tx_bytes'] ?? stats['upload'] ?? 0;
+
+    if (rx == 0 && tx == 0) return;
+
+    _hasRealTrafficReceived = true;
+    _simulatedTrafficTimer?.cancel();
 
     final now = DateTime.now();
     final double durationSec = now.difference(_lastTrafficTime).inMilliseconds / 1000.0;
 
-    if (durationSec > 0 && _lastRxBytes > 0) {
-      final double downloadSpeed = ((rx - _lastRxBytes) / durationSec).clamp(0, double.infinity);
-      final double uploadSpeed = ((tx - _lastTxBytes) / durationSec).clamp(0, double.infinity);
+    if (_lastRxBytes > 0 && durationSec > 0.2) {
+      final double deltaRx = (rx - _lastRxBytes).toDouble();
+      final double deltaTx = (tx - _lastTxBytes).toDouble();
 
-      emit(state.copyWith(
-        downloadSpeed: downloadSpeed,
-        uploadSpeed: uploadSpeed,
-        totalRxBytes: rx,
-        totalTxBytes: tx,
-      ));
+      if (deltaRx >= 0 && deltaTx >= 0) {
+        final double downloadSpeed = (deltaRx / durationSec).clamp(0, double.infinity);
+        final double uploadSpeed = (deltaTx / durationSec).clamp(0, double.infinity);
+
+        emit(state.copyWith(
+          downloadSpeed: downloadSpeed,
+          uploadSpeed: uploadSpeed,
+          totalRxBytes: rx,
+          totalTxBytes: tx,
+        ));
+      }
     }
 
     _lastRxBytes = rx;
@@ -74,17 +87,22 @@ class VpnCubit extends Cubit<VpnState> {
 
   /// Start VPN connection to [server]
   Future<void> connect(ServerModel server) async {
+    _lastRxBytes = 0;
+    _lastTxBytes = 0;
+    _hasRealTrafficReceived = false;
+
     emit(state.copyWith(
       stage: VpnStage.connecting,
       connectedServer: server,
       assignedIp: server.assignedIp,
+      downloadSpeed: 0.0,
+      uploadSpeed: 0.0,
       errorMessage: null,
     ));
 
     try {
       await _vpnRepository.startVpn(server);
 
-      // Connection negotiation timing
       Timer(const Duration(seconds: 2), () {
         if (state.stage == VpnStage.connecting) {
           _handleStageChange(VpnStage.connected);
@@ -133,30 +151,35 @@ class VpnCubit extends Cubit<VpnState> {
   void _stopSessionTimer() {
     _sessionTimer?.cancel();
     _connectedTime = null;
+    _lastRxBytes = 0;
+    _lastTxBytes = 0;
+    _hasRealTrafficReceived = false;
+
     emit(state.copyWith(
       sessionDuration: Duration.zero,
-      downloadSpeed: 0,
-      uploadSpeed: 0,
+      downloadSpeed: 0.0,
+      uploadSpeed: 0.0,
     ));
   }
 
-  /// Simulates realistic telemetry fluctuation when running on desktop/emulator without active WireGuard kernel module
+  /// Fallback simulated telemetry for desktop/emulator environments
   void _startTrafficSimulationIfNecessary() {
     _simulatedTrafficTimer?.cancel();
     final random = Random();
 
     _simulatedTrafficTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (state.stage != VpnStage.connected) return;
+      if (state.stage != VpnStage.connected || _hasRealTrafficReceived) return;
 
-      final double simulatedDown = (30 * 1024 * 1024 / 8) + (random.nextDouble() * 15 * 1024 * 1024 / 8);
-      final double simulatedUp = (400 * 1024 / 8) + (random.nextDouble() * 200 * 1024 / 8);
+      // Realistic speed simulation in Bytes/sec (~25 - 45 Mbps down, ~15 - 30 Mbps up)
+      final double simulatedDownBytesPerSec = (25.0 + random.nextDouble() * 20.0) * 1024 * 1024 / 8.0;
+      final double simulatedUpBytesPerSec = (15.0 + random.nextDouble() * 15.0) * 1024 * 1024 / 8.0;
 
-      final newTotalRx = state.totalRxBytes + (simulatedDown / 8);
-      final newTotalTx = state.totalTxBytes + (simulatedUp / 8);
+      final newTotalRx = state.totalRxBytes + simulatedDownBytesPerSec;
+      final newTotalTx = state.totalTxBytes + simulatedUpBytesPerSec;
 
       emit(state.copyWith(
-        downloadSpeed: simulatedDown,
-        uploadSpeed: simulatedUp,
+        downloadSpeed: simulatedDownBytesPerSec,
+        uploadSpeed: simulatedUpBytesPerSec,
         totalRxBytes: newTotalRx,
         totalTxBytes: newTotalTx,
       ));
