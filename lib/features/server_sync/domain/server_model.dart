@@ -17,7 +17,7 @@ class ServerModel extends Equatable {
     required this.city,
     required this.flagCode,
     required this.fileName,
-    required this.isPro,
+    this.isPro = false,
     required this.endpoint,
     this.confContent,
     this.pingMs = 45,
@@ -136,7 +136,7 @@ class ServerModel extends Equatable {
         city: manifestOverride['city'] as String? ?? city,
         flagCode: manifestOverride['flag_code'] as String? ?? flagCode,
         fileName: fileName,
-        isPro: manifestOverride['is_pro'] as bool? ?? false,
+        isPro: false,
         endpoint: manifestOverride['endpoint'] as String? ?? parsedEndpoint,
         confContent: confContent,
       );
@@ -148,7 +148,7 @@ class ServerModel extends Equatable {
       city: city,
       flagCode: flagCode,
       fileName: fileName,
-      isPro: cleanName.contains('2') || cleanName.contains('pro'),
+      isPro: false,
       endpoint: parsedEndpoint,
       confContent: confContent,
     );
