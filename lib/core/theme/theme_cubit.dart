@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ThemeCubit extends Cubit<ThemeMode> {
   static const String _prefThemeKey = 'pref_theme_mode';
 
-  ThemeCubit() : super(ThemeMode.dark) {
+  ThemeCubit() : super(ThemeMode.light) {
     _loadThemeMode();
   }
 
@@ -20,8 +20,8 @@ class ThemeCubit extends Cubit<ThemeMode> {
       } else if (savedTheme == 'system') {
         emit(ThemeMode.system);
       } else {
-        // Default to dark mode for fintech/vpn security aesthetic
-        emit(ThemeMode.dark);
+        // Default to Light Mode as requested
+        emit(ThemeMode.light);
       }
     } catch (_) {}
   }
@@ -35,10 +35,10 @@ class ThemeCubit extends Cubit<ThemeMode> {
   }
 
   Future<void> toggleTheme() async {
-    if (state == ThemeMode.dark) {
-      await setThemeMode(ThemeMode.light);
-    } else {
+    if (state == ThemeMode.light) {
       await setThemeMode(ThemeMode.dark);
+    } else {
+      await setThemeMode(ThemeMode.light);
     }
   }
 }
