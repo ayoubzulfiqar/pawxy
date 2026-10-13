@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../vpn/presentation/cubit/vpn_cubit.dart';
 import '../../../vpn/presentation/cubit/vpn_state.dart';
@@ -36,7 +37,21 @@ class _ServersScreenState extends State<ServersScreen> {
     return Scaffold(
       backgroundColor: AppColors.background(isDark),
       appBar: AppBar(
-        title: const Text('VPN Servers'),
+        title: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                AppConstants.mascotLogoAsset,
+                width: 28,
+                height: 28,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Text('VPN Servers'),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -55,7 +70,6 @@ class _ServersScreenState extends State<ServersScreen> {
             children: [
               const SizedBox(height: 12),
 
-              // Search Bar
               TextField(
                 controller: _searchController,
                 style: TextStyle(color: AppColors.textPrimary(isDark)),
@@ -98,7 +112,6 @@ class _ServersScreenState extends State<ServersScreen> {
 
               const SizedBox(height: 14),
 
-              // Category Filter Pills
               BlocBuilder<ServerCubit, ServerState>(
                 builder: (context, state) {
                   final String currentCategory =
@@ -118,12 +131,11 @@ class _ServersScreenState extends State<ServersScreen> {
 
               const SizedBox(height: 16),
 
-              // Premium Promo Banner
               PremiumBanner(
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('VPN Guard Premium coming soon!'),
+                      content: Text('Pawxy Premium coming soon!'),
                       backgroundColor: AppColors.electricBlue,
                     ),
                   );
@@ -132,7 +144,6 @@ class _ServersScreenState extends State<ServersScreen> {
 
               const SizedBox(height: 16),
 
-              // Server Cards List
               Expanded(
                 child: BlocBuilder<ServerCubit, ServerState>(
                   builder: (context, serverState) {
