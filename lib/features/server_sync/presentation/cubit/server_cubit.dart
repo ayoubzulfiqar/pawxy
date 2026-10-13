@@ -1,0 +1,102 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/constants/app_constants.dart';
+import '../../data/config_repository.dart';
+import '../../domain/server_model.dart';
+import 'server_state.dart';
+
+class ServerCubit extends Cubit<ServerState> {
+  final ConfigRepository _configRepository;
+
+  ServerCubit({ConfigRepository? configRepository})
+      : _configRepository = configRepository ?? ConfigRepository(),
+        super(ServerInitial());
+
+  Future<void> loadServers() async {
+    emit(ServerLoading());
+    try {
+      final servers = await _configRepository.loadAndSyncServers();
+      if (servers.isEmpty) {
+        emit(const ServerError('No VPN servers available'));
+        return;
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      final savedServerId = prefs.getString(AppConstants.prefSelectedServerId);
+
+      ServerModel selected = servers.first;
+      if (savedServerId != null) {
+        final match = servers.where((s) => s.id == savedServerId).firstOrNull;
+        if (match != null) {
+          selected = match;
+        }
+      }
+
+      emit(ServerLoaded(
+        allServers: servers,
+        filteredServers: servers,
+        selectedServer: selected,
+      ));
+    } catch (e) {
+      emit(ServerError('Failed to load server list: $e'));
+    }
+  }
+
+  void selectServer(ServerModel server) async {
+    final currentState = state;
+    if (currentState is ServerLoaded) {
+      emit(currentState.copyWith(selectedServer: server));
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(AppConstants.prefSelectedServerId, server.id);
+    }
+  }
+
+  void searchServers(String query) {
+    final currentState = state;
+    if (currentState is ServerLoaded) {
+      final filtered = _applyFilters(
+        currentState.allServers,
+        query,
+        currentState.selectedCategory,
+      );
+      emit(currentState.copyWith(
+        searchQuery: query,
+        filteredServers: filtered,
+      ));
+    }
+  }
+
+  void filterByCategory(String category) {
+    final currentState = state;
+    if (currentState is ServerLoaded) {
+      final filtered = _applyFilters(
+        currentState.allServers,
+        currentState.searchQuery,
+        category,
+      );
+      emit(currentState.copyWith(
+        selectedCategory: category,
+        filteredServers: filtered,
+      ));
+    }
+  }
+
+  List<ServerModel> _applyFilters(
+      List<ServerModel> servers, String query, String category) {
+    return servers.where((server) {
+      final matchesQuery = query.isEmpty ||
+          server.country.toLowerCase().contains(query.toLowerCase()) ||
+          server.city.toLowerCase().contains(query.toLowerCase());
+
+      bool matchesCategory = true;
+      if (category == 'Free') {
+        matchesCategory = !server.isPro;
+      } else if (category == 'Pro') {
+        matchesCategory = server.isPro;
+      }
+
+      return matchesQuery && matchesCategory;
+    }).toList();
+  }
+}
