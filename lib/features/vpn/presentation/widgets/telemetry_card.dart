@@ -17,10 +17,10 @@ class TelemetryCard extends StatelessWidget {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
         color: AppColors.cardSurface(isDark),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.cardBorder(isDark), width: 1),
       ),
       child: Row(
@@ -28,10 +28,10 @@ class TelemetryCard extends StatelessWidget {
           Expanded(
             child: _buildSpeedItem(
               context: context,
-              title: 'Upload',
-              speedText: Formatters.formatSpeed(uploadSpeed),
-              icon: Icons.arrow_upward_rounded,
-              iconColor: AppColors.electricBlue,
+              title: 'Download',
+              speedText: Formatters.formatSpeed(downloadSpeed),
+              icon: Icons.arrow_downward_rounded,
+              iconColor: AppColors.emeraldGreen,
               isDark: isDark,
             ),
           ),
@@ -45,10 +45,10 @@ class TelemetryCard extends StatelessWidget {
           Expanded(
             child: _buildSpeedItem(
               context: context,
-              title: 'Download',
-              speedText: Formatters.formatSpeed(downloadSpeed),
-              icon: Icons.arrow_downward_rounded,
-              iconColor: AppColors.emeraldGreen,
+              title: 'Upload',
+              speedText: Formatters.formatSpeed(uploadSpeed),
+              icon: Icons.arrow_upward_rounded,
+              iconColor: AppColors.pawxyOrange,
               isDark: isDark,
             ),
           ),
@@ -69,7 +69,7 @@ class TelemetryCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: iconColor.withValues(alpha: 0.12),
             shape: BoxShape.circle,
@@ -77,31 +77,35 @@ class TelemetryCard extends StatelessWidget {
           child: Icon(
             icon,
             color: iconColor,
-            size: 20,
+            size: 18,
           ),
         ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary(isDark),
-                    fontWeight: FontWeight.w500,
-                  ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              speedText,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.textPrimary(isDark),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-            ),
-          ],
+        const SizedBox(width: 10),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary(isDark),
+                      fontWeight: FontWeight.w500,
+                    ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                speedText,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppColors.textPrimary(isDark),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+              ),
+            ],
+          ),
         ),
       ],
     );
