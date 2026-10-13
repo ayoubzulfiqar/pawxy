@@ -22,9 +22,24 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/pawxy.png"
+  min_sdk_android: 21
+  windows:
+    generate: true
+    image_path: "assets/pawxy.png"
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "assets/pawxy.png"
 
 flutter:
   uses-material-design: true
   assets:
+    - assets/pawxy.png
     - assets/fallback_manifest.json
     - assets/fallback_us.conf
