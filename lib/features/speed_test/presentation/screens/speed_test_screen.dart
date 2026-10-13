@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pawxy/core/constants/app_constants.dart';
 import 'package:pawxy/core/theme/app_colors.dart';
 import 'package:pawxy/core/utils/formatters.dart';
 import 'package:pawxy/features/server_sync/presentation/cubit/server_cubit.dart';
@@ -21,7 +22,21 @@ class SpeedTestScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background(isDark),
       appBar: AppBar(
-        title: const Text('Speed Test'),
+        title: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                AppConstants.mascotLogoAsset,
+                width: 28,
+                height: 28,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Text('Speed Test'),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.more_vert_rounded),
