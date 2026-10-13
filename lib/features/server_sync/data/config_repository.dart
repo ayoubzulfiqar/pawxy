@@ -17,19 +17,29 @@ class ConfigRepository {
 
   /// Returns persistent directory for vpn_configs
   Future<Directory> _getConfigsDirectory() async {
-    final docsDir = await getApplicationDocumentsDirectory();
-    final configDir = Directory(p.join(docsDir.path, 'vpn_configs'));
-    if (!await configDir.exists()) {
-      await configDir.create(recursive: true);
+    try {
+      final docsDir = await getApplicationDocumentsDirectory();
+      final configDir = Directory(p.join(docsDir.path, 'vpn_configs'));
+      if (!await configDir.exists()) {
+        await configDir.create(recursive: true);
+      }
+      return configDir;
+    } catch (_) {
+      final tempDir = Directory.systemTemp;
+      final configDir = Directory(p.join(tempDir.path, 'vpn_configs'));
+      if (!await configDir.exists()) {
+        await configDir.create(recursive: true);
+      }
+      return configDir;
     }
-    return configDir;
   }
 
-  /// Synchronizes and returns the server list by scanning local .conf files and remote repo.
-  Future<List<ServerModel>> loadAndSyncServers() async {
+  /// Synchronizes and returns server list by scanning local configs and GitHub remote repo.
+  /// Automatically re-downloads GitHub .conf files weekly (7-day interval), when version increases, or on forceSync.
+  Future<List<ServerModel>> loadAndSyncServers({bool forceSync = false}) async {
     Map<String, ServerModel> serversMap = {};
 
-    // Step 1: Scan local configs directory for any existing .conf files
+    // Step 1: Scan local configs directory for existing .conf files
     try {
       final localScanned = await _scanLocalConfigsDirectory();
       for (final server in localScanned) {
@@ -37,14 +47,17 @@ class ConfigRepository {
       }
     } catch (_) {}
 
-    // Step 2: Concurrently fetch remote manifest from GitHub raw URL
+    final prefs = await SharedPreferences.getInstance();
+    final int lastSyncMillis = prefs.getInt(AppConstants.prefLastSyncTimestamp) ?? 0;
+    final DateTime lastSyncTime = DateTime.fromMillisecondsSinceEpoch(lastSyncMillis);
+    final bool isWeeklySyncDue = DateTime.now().difference(lastSyncTime).inDays >= 7;
+
+    // Step 2: Fetch remote manifest & download .conf files from GitHub
     try {
       final remoteManifestStr =
           await _apiClient.fetchRawText(AppConstants.manifestUrl);
       final remoteJson = jsonDecode(remoteManifestStr) as Map<String, dynamic>;
       final int remoteVersion = remoteJson['version'] as int? ?? 0;
-
-      final prefs = await SharedPreferences.getInstance();
       final int localVersion =
           prefs.getInt(AppConstants.prefManifestVersion) ?? -1;
 
@@ -52,8 +65,12 @@ class ConfigRepository {
           remoteJson['servers'] as List<dynamic>? ?? [];
       final Directory configDir = await _getConfigsDirectory();
 
-      // Download/update remote .conf files if version is newer or local is missing
-      if (remoteVersion > localVersion || serversMap.isEmpty) {
+      final bool shouldSyncFromGithub = forceSync ||
+          remoteVersion > localVersion ||
+          serversMap.isEmpty ||
+          isWeeklySyncDue;
+
+      if (shouldSyncFromGithub) {
         for (final item in serverListJson) {
           final serverMap = item as Map<String, dynamic>;
           final String fileName =
@@ -83,18 +100,21 @@ class ConfigRepository {
         }
 
         await prefs.setInt(AppConstants.prefManifestVersion, remoteVersion);
+        await prefs.setInt(
+            AppConstants.prefLastSyncTimestamp, DateTime.now().millisecondsSinceEpoch);
         await prefs.setString(
             AppConstants.prefCachedManifestJson, jsonEncode(remoteJson));
       }
     } catch (_) {
-      // Offline / Network error -> continue with locally scanned files
+      // Offline / Network error -> continue with local files
     }
 
-    // Rescan local configs directory to ensure all user-added or downloaded .conf files are included
+    // Rescan local configs directory to ensure all files are loaded
     try {
       final localScanned = await _scanLocalConfigsDirectory();
       for (final server in localScanned) {
-        if (!serversMap.containsKey(server.fileName)) {
+        if (!serversMap.containsKey(server.fileName) ||
+            serversMap[server.fileName]?.confContent == null) {
           serversMap[server.fileName] = server;
         }
       }
@@ -106,7 +126,7 @@ class ConfigRepository {
       return await _updateServerPings(finalServers);
     }
 
-    // Step 3: Fallback to bundled asset manifest & conf if nothing was found
+    // Fallback to bundled asset manifest & conf if empty
     return await _loadFromAssetBundle();
   }
 
