@@ -57,7 +57,7 @@ class _HeroPowerButtonState extends State<HeroPowerButton>
       iconColor = Colors.white;
     } else if (isConnecting) {
       glowColor = AppColors.powerConnectingGlow;
-      buttonColor = AppColors.electricBlue;
+      buttonColor = AppColors.pawxyOrange;
       iconColor = Colors.white;
     } else {
       glowColor = Colors.transparent;
@@ -93,7 +93,7 @@ class _HeroPowerButtonState extends State<HeroPowerButton>
                           BoxShadow(
                             color: isConnected
                                 ? AppColors.emeraldGreen.withValues(alpha: 0.35)
-                                : AppColors.electricBlue.withValues(alpha: 0.35),
+                                : AppColors.pawxyOrange.withValues(alpha: 0.35),
                             blurRadius: 40,
                             spreadRadius: 10,
                           ),
@@ -112,7 +112,7 @@ class _HeroPowerButtonState extends State<HeroPowerButton>
                       color: isConnected
                           ? AppColors.emeraldGreen.withValues(alpha: 0.5)
                           : isConnecting
-                              ? AppColors.electricBlue.withValues(alpha: 0.5)
+                              ? AppColors.pawxyOrange.withValues(alpha: 0.5)
                               : AppColors.cardBorder(isDark),
                       width: 2,
                     ),
