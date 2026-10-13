@@ -123,11 +123,26 @@ class ConfigRepository {
     final List<ServerModel> finalServers = serversMap.values.toList();
 
     if (finalServers.isNotEmpty) {
-      return await _updateServerPings(finalServers);
+      return finalServers;
     }
 
     // Fallback to bundled asset manifest & conf if empty
     return await _loadFromAssetBundle();
+  }
+
+  /// Non-blocking asynchronous latency ping updates
+  Future<List<ServerModel>> updateServerPingsAsync(List<ServerModel> servers) async {
+    final List<Future<ServerModel>> pingFutures = servers.map((server) async {
+      try {
+        final int ping = await LatencyPinger.pingEndpoint(server.endpoint)
+            .timeout(const Duration(milliseconds: 1200), onTimeout: () => server.pingMs);
+        return server.copyWith(pingMs: ping);
+      } catch (_) {
+        return server;
+      }
+    }).toList();
+
+    return await Future.wait(pingFutures);
   }
 
   /// Automatically scans local vpn_configs directory for all .conf files
@@ -174,7 +189,7 @@ class ConfigRepository {
           manifestOverride: map,
         ));
       }
-      return await _updateServerPings(result);
+      return result;
     } catch (_) {
       final fallbackConf = await _getFallbackConfContent();
       return [
@@ -201,15 +216,5 @@ AllowedIPs = 0.0.0.0/0, ::/0
 Endpoint = 147.135.15.16:443
 PersistentKeepalive = 25''';
     }
-  }
-
-  /// Calculates real-time ping latency for each server concurrently
-  Future<List<ServerModel>> _updateServerPings(List<ServerModel> servers) async {
-    final List<Future<ServerModel>> pingFutures = servers.map((server) async {
-      final int ping = await LatencyPinger.pingEndpoint(server.endpoint);
-      return server.copyWith(pingMs: ping);
-    }).toList();
-
-    return await Future.wait(pingFutures);
   }
 }
