@@ -9,7 +9,7 @@ import 'package:http/testing.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('ConfigRepository Auto-Sync Tests', () {
+  group('ConfigRepository Auto-Sync & Purge Tests', () {
     test('loadAndSyncServers updates last sync timestamp on remote sync', () async {
       SharedPreferences.setMockInitialValues({});
 
@@ -23,13 +23,14 @@ void main() {
       final apiClient = ApiClient(client: mockClient);
       final repository = ConfigRepository(apiClient: apiClient);
 
-      await repository.loadAndSyncServers();
+      final servers = await repository.loadAndSyncServers(forceSync: true);
 
       final prefs = await SharedPreferences.getInstance();
       final lastSyncMillis = prefs.getInt(AppConstants.prefLastSyncTimestamp);
 
       expect(lastSyncMillis, isNotNull);
       expect(lastSyncMillis!, greaterThan(0));
+      expect(servers.any((s) => s.fileName == 'us1.conf'), isTrue);
     });
   });
 }
