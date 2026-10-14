@@ -35,7 +35,8 @@ class ConfigRepository {
   }
 
   /// Synchronizes and returns server list by scanning local configs and GitHub remote repo.
-  /// Automatically re-downloads GitHub .conf files weekly (7-day interval), when version increases, or on forceSync.
+  /// Downloads latest .conf files from GitHub and purges previous/outdated files no longer in manifest.
+  /// Automatically re-syncs weekly (7-day interval), when version increases, or on forceSync.
   Future<List<ServerModel>> loadAndSyncServers({bool forceSync = false}) async {
     Map<String, ServerModel> serversMap = {};
 
@@ -71,10 +72,13 @@ class ConfigRepository {
           isWeeklySyncDue;
 
       if (shouldSyncFromGithub) {
+        final Set<String> activeRemoteFiles = {};
+
         for (final item in serverListJson) {
           final serverMap = item as Map<String, dynamic>;
           final String fileName =
               serverMap['file_name'] as String? ?? 'us1.conf';
+          activeRemoteFiles.add(fileName);
           final String confUrl = '${AppConstants.githubRawBaseUrl}/$fileName';
 
           String confContent = '';
@@ -99,6 +103,21 @@ class ConfigRepository {
           serversMap[fileName] = server;
         }
 
+        // PURGE OUTDATED LOCAL .conf FILES NOT PRESENT IN GITHUB MANIFEST
+        try {
+          final List<FileSystemEntity> localEntities =
+              await configDir.list().toList();
+          for (final entity in localEntities) {
+            if (entity is File && entity.path.toLowerCase().endsWith('.conf')) {
+              final String localFileName = p.basename(entity.path);
+              if (!activeRemoteFiles.contains(localFileName)) {
+                await entity.delete();
+                serversMap.remove(localFileName);
+              }
+            }
+          }
+        } catch (_) {}
+
         await prefs.setInt(AppConstants.prefManifestVersion, remoteVersion);
         await prefs.setInt(
             AppConstants.prefLastSyncTimestamp, DateTime.now().millisecondsSinceEpoch);
@@ -109,7 +128,7 @@ class ConfigRepository {
       // Offline / Network error -> continue with local files
     }
 
-    // Rescan local configs directory to ensure all files are loaded
+    // Rescan local configs directory to ensure all active files are loaded
     try {
       final localScanned = await _scanLocalConfigsDirectory();
       for (final server in localScanned) {
