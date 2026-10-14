@@ -29,6 +29,28 @@ class _ServersScreenState extends State<ServersScreen> {
     super.dispose();
   }
 
+  void _triggerGithubConfigFetch() {
+    context.read<ServerCubit>().loadServers(forceSync: true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            Icon(Icons.sync_rounded, color: Colors.white, size: 20),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Fetching latest configs from GitHub & purging outdated files...',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.pawxyOrange,
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
@@ -54,10 +76,8 @@ class _ServersScreenState extends State<ServersScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Sync Servers',
-            onPressed: () {
-              context.read<ServerCubit>().loadServers(forceSync: true);
-            },
+            tooltip: 'Fetch GitHub Configs',
+            onPressed: _triggerGithubConfigFetch,
           ),
           const SizedBox(width: 8),
         ],
@@ -67,6 +87,35 @@ class _ServersScreenState extends State<ServersScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
+              const SizedBox(height: 10),
+
+              // Prominent "Fetch Latest Configs from GitHub" Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.pawxyOrange.withValues(alpha: 0.12),
+                    foregroundColor: AppColors.pawxyOrange,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: const BorderSide(color: AppColors.pawxyOrange, width: 1.2),
+                    ),
+                  ),
+                  icon: const Icon(Icons.cloud_download_rounded, size: 20),
+                  label: const Text(
+                    'Fetch Latest Configs from GitHub',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  onPressed: _triggerGithubConfigFetch,
+                ),
+              ),
+
               const SizedBox(height: 12),
 
               TextField(
