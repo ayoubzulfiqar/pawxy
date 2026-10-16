@@ -53,57 +53,52 @@ class ConfigRepository {
     final DateTime lastSyncTime = DateTime.fromMillisecondsSinceEpoch(lastSyncMillis);
     final bool isWeeklySyncDue = DateTime.now().difference(lastSyncTime).inDays >= 7;
 
-    // Step 2: Fetch remote manifest & download .conf files from GitHub
-    try {
-      final remoteManifestStr =
-          await _apiClient.fetchRawText(AppConstants.manifestUrl);
-      final remoteJson = jsonDecode(remoteManifestStr) as Map<String, dynamic>;
-      final int remoteVersion = remoteJson['version'] as int? ?? 0;
-      final int localVersion =
-          prefs.getInt(AppConstants.prefManifestVersion) ?? -1;
+    // Step 2: Fetch remote GitHub directory via GitHub REST API
+    final bool shouldSyncFromGithub = forceSync ||
+        serversMap.isEmpty ||
+        isWeeklySyncDue;
 
-      final List<dynamic> serverListJson =
-          remoteJson['servers'] as List<dynamic>? ?? [];
-      final Directory configDir = await _getConfigsDirectory();
+    if (shouldSyncFromGithub) {
+      final Set<String> activeRemoteFiles = {};
 
-      final bool shouldSyncFromGithub = forceSync ||
-          remoteVersion > localVersion ||
-          serversMap.isEmpty ||
-          isWeeklySyncDue;
+      try {
+        final String contentsResponseStr =
+            await _apiClient.fetchRawText(AppConstants.githubApiContentsUrl);
+        final List<dynamic> contentsJson = jsonDecode(contentsResponseStr);
 
-      if (shouldSyncFromGithub) {
-        final Set<String> activeRemoteFiles = {};
+        final Directory configDir = await _getConfigsDirectory();
 
-        for (final item in serverListJson) {
-          final serverMap = item as Map<String, dynamic>;
-          final String fileName =
-              serverMap['file_name'] as String? ?? 'us1.conf';
-          activeRemoteFiles.add(fileName);
-          final String confUrl = '${AppConstants.githubRawBaseUrl}/$fileName';
+        for (final item in contentsJson) {
+          if (item['type'] == 'file' && item['name'].toString().endsWith('.conf')) {
+            final String fileName = item['name'];
+            activeRemoteFiles.add(fileName);
 
-          String confContent = '';
-          try {
-            confContent = await _apiClient.fetchRawText(confUrl);
-            final File localConfFile = File(p.join(configDir.path, fileName));
-            await localConfFile.writeAsString(confContent);
-          } catch (_) {
-            final File localConfFile = File(p.join(configDir.path, fileName));
-            if (await localConfFile.exists()) {
-              confContent = await localConfFile.readAsString();
-            } else {
-              confContent = await _getFallbackConfContent();
+            final String confUrl = item['download_url'] ??
+                '${AppConstants.githubRawBaseUrl}/$fileName';
+
+            String confContent = '';
+            try {
+              confContent = await _apiClient.fetchRawText(confUrl);
+              final File localConfFile = File(p.join(configDir.path, fileName));
+              await localConfFile.writeAsString(confContent);
+            } catch (_) {
+              final File localConfFile = File(p.join(configDir.path, fileName));
+              if (await localConfFile.exists()) {
+                confContent = await localConfFile.readAsString();
+              }
+            }
+
+            if (confContent.isNotEmpty) {
+              final server = ServerModel.fromWgConfigContent(
+                fileName: fileName,
+                confContent: confContent,
+              );
+              serversMap[fileName] = server;
             }
           }
-
-          final server = ServerModel.fromWgConfigContent(
-            fileName: fileName,
-            confContent: confContent,
-            manifestOverride: serverMap,
-          );
-          serversMap[fileName] = server;
         }
 
-        // PURGE OUTDATED LOCAL .conf FILES NOT PRESENT IN GITHUB MANIFEST
+        // PURGE OUTDATED LOCAL .conf FILES NOT PRESENT IN GITHUB REPO
         try {
           final List<FileSystemEntity> localEntities =
               await configDir.list().toList();
@@ -118,14 +113,11 @@ class ConfigRepository {
           }
         } catch (_) {}
 
-        await prefs.setInt(AppConstants.prefManifestVersion, remoteVersion);
-        await prefs.setInt(
-            AppConstants.prefLastSyncTimestamp, DateTime.now().millisecondsSinceEpoch);
-        await prefs.setString(
-            AppConstants.prefCachedManifestJson, jsonEncode(remoteJson));
+        await prefs.setInt(AppConstants.prefLastSyncTimestamp,
+            DateTime.now().millisecondsSinceEpoch);
+      } catch (_) {
+        // Offline / Network error -> continue with local files
       }
-    } catch (_) {
-      // Offline / Network error -> continue with local files
     }
 
     // Rescan local configs directory to ensure all active files are loaded

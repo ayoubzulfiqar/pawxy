@@ -10,12 +10,12 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('ConfigRepository Auto-Sync & Purge Tests', () {
-    test('loadAndSyncServers updates last sync timestamp on remote sync', () async {
+    test('loadAndSyncServers updates last sync timestamp on remote sync via GitHub API', () async {
       SharedPreferences.setMockInitialValues({});
 
       final mockClient = MockClient((request) async {
-        if (request.url.toString().contains('manifest.json')) {
-          return http.Response('{"version": 1, "servers": [{"file_name": "us1.conf", "country": "United States"}]}', 200);
+        if (request.url.toString().contains('api.github.com')) {
+          return http.Response('[{"name": "us1.conf", "type": "file", "download_url": "https://raw.githubusercontent.com/ayoubzulfiqar/pawxy/main/conf/us1.conf"}]', 200);
         }
         return http.Response('[Interface]\nAddress = 10.0.0.1/32\n[Peer]\nEndpoint = 1.2.3.4:443', 200);
       });

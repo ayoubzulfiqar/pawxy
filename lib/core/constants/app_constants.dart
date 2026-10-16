@@ -4,7 +4,8 @@ class AppConstants {
   // GitHub Raw Config URLs
   static const String githubRawBaseUrl =
       'https://raw.githubusercontent.com/ayoubzulfiqar/pawxy/main/conf';
-  static const String manifestUrl = '$githubRawBaseUrl/manifest.json';
+  static const String githubApiContentsUrl =
+      'https://api.github.com/repos/ayoubzulfiqar/pawxy/contents/conf?ref=main';
 
   // Fallback Asset Paths
   static const String mascotLogoAsset = 'assets/pawxy.png';
