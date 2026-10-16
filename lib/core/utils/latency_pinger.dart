@@ -10,26 +10,35 @@ class LatencyPinger {
       final host = parts[0].trim();
       final port = parts.length > 1 ? int.tryParse(parts[1]) ?? 443 : 443;
 
-      final stopwatch = Stopwatch()..start();
-      final socket = await Socket.connect(
-        host,
-        port,
-        timeout: const Duration(seconds: 2),
-      );
-      stopwatch.stop();
-      await socket.close();
-      socket.destroy();
+      // 1. Try TCP connect on the specified port
+      try {
+        final stopwatch = Stopwatch()..start();
+        final socket = await Socket.connect(
+          host,
+          port,
+          timeout: const Duration(seconds: 1),
+        );
+        stopwatch.stop();
+        await socket.close();
+        socket.destroy();
+        return stopwatch.elapsedMilliseconds;
+      } catch (_) {
+        // 2. If TCP fails (common for UDP-only WireGuard servers), try real ICMP ping
+        if (Platform.isAndroid || Platform.isIOS || Platform.isLinux || Platform.isMacOS) {
+          try {
+            final result = await Process.run('ping', ['-c', '1', '-W', '1', host]);
+            if (result.exitCode == 0) {
+              final output = result.stdout.toString();
+              final match = RegExp(r'time=([\d.]+)\s*ms').firstMatch(output);
+              if (match != null) {
+                return double.parse(match.group(1)!).toInt();
+              }
+            }
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
 
-      return stopwatch.elapsedMilliseconds;
-    } catch (_) {
-      // Fallback fallback simulated ping based on host hash if real ping fails or offline
-      return _generateFallbackPing(endpoint);
-    }
-  }
-
-  static int _generateFallbackPing(String endpoint) {
-    final hash = endpoint.hashCode.abs();
-    // Return a realistic ping between 15ms and 120ms
-    return 15 + (hash % 85);
+    return 999; // Return high ping if unreachable instead of fake simulation
   }
 }
