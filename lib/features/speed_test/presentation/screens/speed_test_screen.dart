@@ -42,9 +42,9 @@ class SpeedTestScreen extends StatelessWidget {
         builder: (context, serverState) {
           return BlocBuilder<VpnCubit, VpnState>(
             builder: (context, vpnState) {
-              final activeServer = (serverState is ServerLoaded)
-                  ? (vpnState.connectedServer ?? serverState.selectedServer)
-                  : null;
+              final activeServer = (vpnState.stage.name == 'connected' || vpnState.stage.name == 'connecting')
+                  ? vpnState.connectedServer
+                  : (serverState is ServerLoaded ? serverState.selectedServer : null);
 
               return BlocBuilder<SpeedTestCubit, SpeedTestState>(
                 builder: (context, speedState) {
