@@ -41,8 +41,33 @@ class WireGuardRepository {
   Future<void> startVpn(ServerModel server) async {
     await initialize();
 
-    final String wgConfig = server.confContent ?? '';
-    final String serverAddress = server.endpoint;
+    String wgConfig = server.confContent ?? '';
+    
+    // Inject MTU = 1280 for stable cellular/SIM network compatibility if missing
+    if (!wgConfig.toLowerCase().contains('mtu')) {
+      wgConfig = wgConfig.replaceFirst(
+        RegExp(r'\[Interface\]', caseSensitive: false), 
+        '[Interface]\nMTU = 1280'
+      );
+    }
+
+    // Enforce reliable public DNS to prevent ERR_NAME_NOT_RESOLVED issues on connected browsers
+    if (wgConfig.toLowerCase().contains('dns')) {
+      wgConfig = wgConfig.replaceAll(RegExp(r'DNS\s*=.*', caseSensitive: false), 'DNS = 1.1.1.1, 8.8.8.8');
+    } else {
+      wgConfig = wgConfig.replaceFirst(
+        RegExp(r'\[Interface\]', caseSensitive: false), 
+        '[Interface]\nDNS = 1.1.1.1, 8.8.8.8'
+      );
+    }
+
+    // Remove IPv6 from AllowedIPs to prevent cellular/SIM network routing blackholes
+    wgConfig = wgConfig.replaceAll(RegExp(r',\s*::/0', caseSensitive: false), '');
+
+    String serverAddress = server.endpoint;
+    if (!serverAddress.contains(':')) {
+      serverAddress += ':51820'; // Enforce default WireGuard port if missing
+    }
 
     await _wireguard.startVpn(
       serverAddress: serverAddress,
