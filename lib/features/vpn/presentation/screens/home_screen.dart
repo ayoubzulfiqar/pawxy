@@ -74,9 +74,9 @@ class HomeScreen extends StatelessWidget {
         builder: (context, vpnState) {
           return BlocBuilder<ServerCubit, ServerState>(
             builder: (context, serverState) {
-              final activeServer = (serverState is ServerLoaded)
-                  ? (vpnState.connectedServer ?? serverState.selectedServer)
-                  : null;
+              final activeServer = (vpnState.stage.isConnected || vpnState.stage.isConnecting)
+                  ? vpnState.connectedServer
+                  : (serverState is ServerLoaded ? serverState.selectedServer : null);
 
               final String formattedTime =
                   Formatters.formatDuration(vpnState.sessionDuration);
