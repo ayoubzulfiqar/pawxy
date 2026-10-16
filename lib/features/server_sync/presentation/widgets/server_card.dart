@@ -142,7 +142,7 @@ class ServerCard extends StatelessWidget {
   }
 
   Widget _buildActionButton(BuildContext context) {
-    if (isSelected && isConnected) {
+    if (isConnected) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(

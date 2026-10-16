@@ -226,7 +226,8 @@ class _ServersScreenState extends State<ServersScreen> {
                               final server = servers[index];
                               final isSelected =
                                   server.id == serverState.selectedServer.id;
-                              final isConnected = vpnState.stage.name == 'connected';
+                              final isConnected = vpnState.stage.name == 'connected' &&
+                                  vpnState.connectedServer?.id == server.id;
 
                               return ServerCard(
                                 server: server,
@@ -236,6 +237,12 @@ class _ServersScreenState extends State<ServersScreen> {
                                   context
                                       .read<ServerCubit>()
                                       .selectServer(server);
+                                  
+                                  // Auto-connect to new server if already connected
+                                  if (vpnState.stage.name == 'connected') {
+                                    context.read<VpnCubit>().connect(server);
+                                  }
+
                                   widget.onSelectAndNavigateHome();
                                 },
                               );
