@@ -69,14 +69,14 @@ class ServerModel extends Equatable {
   }) {
     String parsedEndpoint = '127.0.0.1:443';
 
-    // Parse Endpoint from .conf file
+    // Parse Endpoint from .conf file robustness
     final lines = confContent.split('\n');
     for (var line in lines) {
       final trimmed = line.trim();
       if (trimmed.toLowerCase().startsWith('endpoint')) {
         final parts = trimmed.split('=');
         if (parts.length > 1) {
-          parsedEndpoint = parts[1].trim();
+          parsedEndpoint = parts.sublist(1).join('=').trim();
         }
       }
     }
