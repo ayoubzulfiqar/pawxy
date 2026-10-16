@@ -1,6 +1,6 @@
 {
-  "version": 106,
-  "updated_at": "2026-10-12T00:00:00Z",
+  "version": 107,
+  "updated_at": "2026-10-16T12:00:00Z",
   "servers": [
     {
       "id": "us-01",
@@ -35,26 +35,53 @@
       "city": "CA Server 2",
       "flag_code": "CA",
       "file_name": "can2.conf",
-      "is_pro": true,
+      "is_pro": false,
       "endpoint": "142.4.216.196:443"
     },
     {
-      "id": "nl-01",
-      "country": "Netherlands",
-      "city": "Amsterdam",
-      "flag_code": "NL",
-      "file_name": "neh.conf",
+      "id": "uk-02",
+      "country": "United Kingdom",
+      "city": "London 2",
+      "flag_code": "GB",
+      "file_name": "uk2.conf",
       "is_pro": false,
-      "endpoint": "netherlands.vpnserverhub.com:27621"
+      "endpoint": "145.239.255.68:443"
     },
     {
-      "id": "pl-01",
-      "country": "Poland",
-      "city": "Warsaw",
-      "flag_code": "PL",
-      "file_name": "po.conf",
+      "id": "de-01",
+      "country": "Germany",
+      "city": "Frankfurt 1",
+      "flag_code": "DE",
+      "file_name": "ger1.conf",
       "is_pro": false,
-      "endpoint": "poland.vpnserverhub.com:47090"
+      "endpoint": "51.75.145.20:443"
+    },
+    {
+      "id": "de-02",
+      "country": "Germany",
+      "city": "Frankfurt 2",
+      "flag_code": "DE",
+      "file_name": "ger2.conf",
+      "is_pro": false,
+      "endpoint": "51.75.145.20:443"
+    },
+    {
+      "id": "fr-01",
+      "country": "France",
+      "city": "Paris 1",
+      "flag_code": "FR",
+      "file_name": "fer1.conf",
+      "is_pro": false,
+      "endpoint": "5.196.64.200:443"
+    },
+    {
+      "id": "fr-02",
+      "country": "France",
+      "city": "Paris 2",
+      "flag_code": "FR",
+      "file_name": "fer2.conf",
+      "is_pro": false,
+      "endpoint": "5.196.64.200:443"
     }
   ]
 }
