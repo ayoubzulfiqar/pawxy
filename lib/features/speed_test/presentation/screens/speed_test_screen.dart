@@ -13,7 +13,9 @@ import 'package:pawxy/features/vpn/presentation/cubit/vpn_cubit.dart';
 import 'package:pawxy/features/vpn/presentation/cubit/vpn_state.dart';
 
 class SpeedTestScreen extends StatelessWidget {
-  const SpeedTestScreen({super.key});
+  final VoidCallback onNavigateToServers;
+
+  const SpeedTestScreen({super.key, required this.onNavigateToServers});
 
   @override
   Widget build(BuildContext context) {
@@ -88,74 +90,77 @@ class SpeedTestScreen extends StatelessWidget {
                           const SizedBox(height: 12),
 
                           if (activeServer != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 12),
-                              decoration: BoxDecoration(
-                                color: AppColors.cardSurface(isDark),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                    color: AppColors.cardBorder(isDark),
-                                    width: 1),
-                              ),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    activeServer.flagEmoji,
-                                    style: const TextStyle(fontSize: 22),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          '${activeServer.country} (${activeServer.city})',
-                                          style: TextStyle(
-                                            color: AppColors.textPrimary(isDark),
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        Text(
-                                          vpnState.assignedIp,
-                                          style: TextStyle(
-                                            color: AppColors.textSecondary(isDark),
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
+                            GestureDetector(
+                              onTap: isTesting ? null : onNavigateToServers,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.cardSurface(isDark),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                      color: AppColors.cardBorder(isDark),
+                                      width: 1),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      activeServer.flagEmoji,
+                                      style: const TextStyle(fontSize: 22),
                                     ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.emeraldGreen
-                                          .withValues(alpha: 0.15),
-                                      borderRadius: BorderRadius.circular(8),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${activeServer.country} (${activeServer.city})',
+                                            style: TextStyle(
+                                              color: AppColors.textPrimary(isDark),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Tap to change server',
+                                            style: TextStyle(
+                                              color: AppColors.textSecondary(isDark),
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.bolt_rounded,
-                                          color: AppColors.emeraldGreen,
-                                          size: 16,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '$pingMs ms',
-                                          style: const TextStyle(
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.emeraldGreen
+                                            .withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.bolt_rounded,
                                             color: AppColors.emeraldGreen,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
+                                            size: 16,
                                           ),
-                                        ),
-                                      ],
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '$pingMs ms',
+                                            style: const TextStyle(
+                                              color: AppColors.emeraldGreen,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
 

@@ -28,7 +28,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       HomeScreen(
         onNavigateToServers: () => _navigateToTab(2),
       ),
-      const SpeedTestScreen(),
+      SpeedTestScreen(
+        onNavigateToServers: () => _navigateToTab(2),
+      ),
       ServersScreen(
         onSelectAndNavigateHome: () => _navigateToTab(0),
       ),
